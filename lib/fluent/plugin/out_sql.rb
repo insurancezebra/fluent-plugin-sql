@@ -42,7 +42,7 @@ module Fluent
 
         @mapping = parse_column_mapping(@column_mapping)
         @format_proc = Proc.new { |record, time|
-          new_record = {"time"=>time}
+          record["time"] = Time.at(time)
           @mapping.each { |k, c|
             new_record[c] = record[k]
           }

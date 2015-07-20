@@ -41,8 +41,8 @@ module Fluent
         super
 
         @mapping = parse_column_mapping(@column_mapping)
-        @format_proc = Proc.new { |record|
-          new_record = {}
+        @format_proc = Proc.new { |record, time|
+          new_record = {"time"=>time}
           @mapping.each { |k, c|
             new_record[c] = record[k]
           }
@@ -72,7 +72,7 @@ module Fluent
         chunk.msgpack_each { |tag, time, data|
           begin
             # format process should be moved to emit / format after supports error stream.
-            records << @model.new(@format_proc.call(data))
+            records << @model.new(@format_proc.call(data, time))
           rescue => e
             args = {:error => e.message, :error_class => e.class, :table => @table, :record => Yajl.dump(data)}
             @log.warn "Failed to create the model. Ignore a record:", args
